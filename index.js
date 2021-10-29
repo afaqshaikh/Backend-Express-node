@@ -2,10 +2,12 @@ const express = require('express')
 const cors = require('cors')
 const bd = require('body-parser')
 const authModel = require('./authSchema')
-
+const dotenv = require('dotenv')
 const app = express()
 const mongoose = require('mongoose')
 const port = 5000
+
+dotenv.config()
 
 app.use(cors())
 app.use(bd.urlencoded({
@@ -13,7 +15,7 @@ app.use(bd.urlencoded({
 }))
 app.use(bd.json())
 
-const db = 'mongodb+srv://afaque:afaque@cluster0.slkgc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const db = `mongodb+srv://afaque:${process.env.MONGODB_PASS}@cluster0.slkgc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 
 mongoose.connect(db).then(()=>{
     console.log('Connection sucessful')
