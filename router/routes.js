@@ -16,32 +16,64 @@ routes.get('/', (req, res) => {
     res.send("hello from afaque from routes")
 })
 
-routes.post('/signup', (req, res) => {
+//Signup
+routes.post('/signup', async (req, res) => {
 
     const { name, email, phone, password, cpassword } = req.body
 
     if (!name || !email || !phone || !password || !cpassword) {
         return res.status(422).json({ error: "Fill the field" })
     }
+    try {
 
-    User.findOne({ email: email })
-        .then((userExits) => {
-            if (userExits) return res.status(422).json({ error: "User already exits" })
+        const userExits = await User.findOne({ email: email })
 
-            let userCreate = new User({ name, email, phone, password, cpassword })
+        if (userExits) return res.status(422).json({ error: "User already exits" })
 
-            userCreate.save()
-                .then((response) => {
-                    res.status(201).json({ result: response.message })
-                })
-                .catch((err) => {
-                    res.status(400).json({ result: err.message })
+        let userCreate = new User({ name, email, phone, password, cpassword })
 
-                })
-            res.send("sign up")
+        const newUser = await userCreate.save()
 
-        }).catch((err) => console.log(err))
+
+        if (newUser) {
+            res.status(201).json({ result: "User Register Sucessfully" })
+        } else {
+            res.status(400).json({ result: "User is not registered" })
+        }
+
+    } catch (err) {
+        console.log(err)
+    }
 
 })
+
+//Sginin
+routes.post('/signin', async (req, res) => {
+
+    try {
+
+        const { email, password } = req.body
+
+        if (!email || !password) {
+            return res.status(422).json({ error: "Fill the field properly" })
+        }
+
+        const userlogin = await User.findOne({ email: email })
+        console.log(userlogin)
+
+        if (!userlogin) {
+            return res.status(400).json({ error: "Invalid Credential" })
+        } else {
+            return res.json({ message: "User Login Sucessfully" })
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+
+})
+
+
+
 
 module.exports = routes
