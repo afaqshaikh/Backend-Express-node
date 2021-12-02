@@ -2,6 +2,7 @@ const express = require('express')
 const routes = express.Router()
 const cors = require('cors')
 const bd = require('body-parser')
+const bcrypt = require('bcryptjs')
 
 require("../db/connection")
 const User = require('../modal/authSchema')
@@ -49,9 +50,10 @@ routes.post('/signup', async (req, res) => {
 
 //Sginin
 routes.post('/signin', async (req, res) => {
+    // console.log(req.body)
 
     try {
-
+        let token;
         const { email, password } = req.body
 
         if (!email || !password) {
@@ -59,13 +61,26 @@ routes.post('/signin', async (req, res) => {
         }
 
         const userlogin = await User.findOne({ email: email })
-        console.log(userlogin)
+        // console.log(userlogin)
 
-        if (!userlogin) {
-            return res.status(400).json({ error: "Invalid Credential" })
+
+        if (userlogin) {
+
+            const passMatch = await bcrypt.compare(password, userlogin.password)
+            token = await userlogin.generateAuthToken()
+            // console.log(token);
+
+            if (!passMatch) {
+                return res.status(400).json({ error: "Invalid Credential" })
+            } else {
+                return res.status(200).json({ message: "User Login Sucessfully" })
+            }
+
         } else {
-            return res.json({ message: "User Login Sucessfully" })
+            return res.status(400).json({ error: "Invalid Credential" })
         }
+
+
 
     } catch (error) {
         console.log(error)
